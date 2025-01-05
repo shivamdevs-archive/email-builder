@@ -7,7 +7,7 @@
 	"typings": "./dist/esm/index.d.ts",
 	"scripts": {
 		"dev": "vite",
-		"build": "vite build",
+		"build": "npm run compile",
 		"preview": "vite preview",
 		"prepublishOnly": "npm run compile",
 		"postpublish": "npm run clean",
