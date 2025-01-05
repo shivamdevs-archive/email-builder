@@ -4,21 +4,31 @@
     "module": "esnext",
     "outDir": "./dist/esm",
     "rootDir": "./src/Editor",
-    "lib": [],
+    "lib": [
+      "es5",
+      "es6",
+      "dom"
+    ],
     "moduleResolution": "node",
     "jsx": "react",
     "strict": true,
-    "sourceMap": true,
+    "sourceMap": false,
+    "declarationMap": false,
     "allowJs": true,
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
-    "declarationMap": true,
     "declaration": true,
     "noUnusedLocals": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "types": [
+      "node"
+    ],
+    "typeRoots": [
+      "node_modules/@types"
+    ]
   },
   "include": [
     "src/Editor"
@@ -26,5 +36,5 @@
   "exclude": [
     "dist",
     "node_modules"
-  ]
+  ],
 }

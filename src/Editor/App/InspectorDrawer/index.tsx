@@ -1,6 +1,6 @@
 import React from "react";
 
-import { Box, Drawer, Tab, Tabs } from "@mui/material";
+import { Box, Tab, Tabs } from "@mui/material";
 
 import {
 	setSidebarTab,
@@ -34,11 +34,14 @@ export default function InspectorDrawer({ articles }: InspectorDrawerProps) {
 	};
 
 	return (
-		<Drawer
-			variant="persistent"
-			anchor="right"
-			open={inspectorDrawerOpen}
+		<Box
+			// variant="persistent"
+			// anchor="right"
+			// open={inspectorDrawerOpen}
 			sx={{
+				position: "absolute",
+				inset: 0,
+				left: "auto",
 				width: inspectorDrawerOpen ? INSPECTOR_DRAWER_WIDTH : 0,
 			}}
 		>
@@ -70,6 +73,6 @@ export default function InspectorDrawer({ articles }: InspectorDrawerProps) {
 			>
 				{renderCurrentSidebarPanel()}
 			</Box>
-		</Drawer>
+		</Box>
 	);
 }

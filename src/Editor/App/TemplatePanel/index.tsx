@@ -20,8 +20,6 @@ import {
 } from "../../documents/editor/EditorContext";
 import ToggleInspectorPanelButton from "../InspectorDrawer/ToggleInspectorPanelButton";
 
-import HtmlPanel from "./HtmlPanel";
-import JsonPanel from "./JsonPanel";
 import MainTabsGroup from "./MainTabsGroup";
 
 export default function TemplatePanel() {
@@ -68,10 +66,6 @@ export default function TemplatePanel() {
 						<Reader document={document} rootBlockId="root" />
 					</Box>
 				);
-			case "html":
-				return <HtmlPanel />;
-			case "json":
-				return <JsonPanel />;
 		}
 	};
 
