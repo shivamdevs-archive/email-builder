@@ -4,8 +4,8 @@ import articles from "./articles.json";
 
 import { CssBaseline, ThemeProvider } from "@mui/material";
 
-import Editor from "./App";
-import theme from "./theme";
+import Editor from "./Editor/App";
+import theme from "./Editor/theme";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
 	<React.StrictMode>

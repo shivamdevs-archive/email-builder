@@ -3,6 +3,7 @@
     "target": "es2015",
     "module": "esnext",
     "outDir": "./dist/esm",
+    "rootDir": "./src/Editor",
     "lib": [],
     "moduleResolution": "node",
     "jsx": "react",
@@ -20,10 +21,7 @@
     "allowSyntheticDefaultImports": true
   },
   "include": [
-    "src/App/**/*",
-    "src/documents/**/*",
-    "src/index.tsx",
-    "src/theme.ts"
+    "src/Editor"
   ],
   "exclude": [
     "dist",

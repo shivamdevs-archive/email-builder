@@ -1,5 +1,5 @@
 import React from "react";
-import articles from "./articles.json";
+import articles from "../articles.json";
 
 import { CssBaseline, ThemeProvider } from "@mui/material";
 
