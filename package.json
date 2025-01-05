@@ -1,5 +1,5 @@
 {
-	"name": "email-builder",
+	"name": "uwp-email-builder",
 	"version": "0.0.1",
 	"main": "./dist/cjs/index.js",
 	"module": "./dist/esm/index.js",
