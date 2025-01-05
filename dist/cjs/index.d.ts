@@ -1,4 +1,5 @@
 import React from "react";
-import { EditorProps } from "./App";
-export default function Editor({}: EditorProps): React.JSX.Element;
+import EmailEditor, { EditorProps } from "./App";
+export default function Editor({ articles, onChange, template }: EditorProps): React.JSX.Element;
+export { EmailEditor, type EditorProps };
 //# sourceMappingURL=index.d.ts.map
