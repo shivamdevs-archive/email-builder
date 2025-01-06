@@ -11,14 +11,19 @@ import {
 import ConfigurationPanel from "./ConfigurationPanel";
 import StylesPanel from "./StylesPanel";
 import ArticlesPanel from "./ArticlesPanel";
+import { EditorFileUploadCallback, EditorMetadata } from "../../types";
 
 export const INSPECTOR_DRAWER_WIDTH = 320;
 
 export type InspectorDrawerProps = {
-	articles?: any[];
+	onFileUpload?: EditorFileUploadCallback;
+	metadata: EditorMetadata;
 };
 
-export default function InspectorDrawer({ articles }: InspectorDrawerProps) {
+export default function InspectorDrawer({
+	metadata,
+	onFileUpload,
+}: InspectorDrawerProps) {
 	const selectedSidebarTab = useSelectedSidebarTab();
 	const inspectorDrawerOpen = useInspectorDrawerOpen();
 
@@ -27,17 +32,14 @@ export default function InspectorDrawer({ articles }: InspectorDrawerProps) {
 			case "styles":
 				return <StylesPanel />;
 			case "articles":
-				return <ArticlesPanel articles={articles} />;
+				return <ArticlesPanel metadata={metadata} />;
 			default:
-				return <ConfigurationPanel />;
+				return <ConfigurationPanel onFileUpload={onFileUpload} />;
 		}
 	};
 
 	return (
 		<Box
-			// variant="persistent"
-			// anchor="right"
-			// open={inspectorDrawerOpen}
 			sx={{
 				position: "absolute",
 				inset: 0,

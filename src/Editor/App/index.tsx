@@ -11,6 +11,7 @@ import {
 import InspectorDrawer, { INSPECTOR_DRAWER_WIDTH } from "./InspectorDrawer";
 import TemplatePanel from "./TemplatePanel";
 import { renderToStaticMarkup } from "@usewaypoint/email-builder";
+import { EditorProps } from "../types";
 
 function useDrawerTransition(
 	cssProperty: "margin-left" | "margin-right",
@@ -25,13 +26,15 @@ function useDrawerTransition(
 	});
 }
 
-export type EditorProps = {
-	articles?: any[];
-	template?: any;
-	onChange?: ({ html, design }: { html: string; design: any }) => void;
-};
-
-export default function Editor({ articles, template, onChange }: EditorProps) {
+export default function Editor({
+	articles,
+	categories,
+	onArticleFilter,
+	onArticleMap,
+	template,
+	onChange,
+	onFileUpload,
+}: EditorProps) {
 	const inspectorDrawerOpen = useInspectorDrawerOpen();
 	const document = useDocument();
 
@@ -57,7 +60,15 @@ export default function Editor({ articles, template, onChange }: EditorProps) {
 
 	return (
 		<>
-			<InspectorDrawer articles={articles} />
+			<InspectorDrawer
+				metadata={{
+					articles,
+					categories,
+					onArticleFilter,
+					onArticleMap,
+				}}
+				onFileUpload={onFileUpload}
+			/>
 
 			<Stack
 				sx={{

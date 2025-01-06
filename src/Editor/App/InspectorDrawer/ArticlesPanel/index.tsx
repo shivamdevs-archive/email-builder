@@ -17,15 +17,34 @@ import {
 } from "@mui/material";
 import ImportArticleDialog from "./ImportArticleDialog";
 import { ContentCopy } from "@mui/icons-material";
+import { EditorArticle, EditorMetadata } from "../../../types";
 
-export default function ArticlesPanel({ articles }: { articles?: any[] }) {
+export type ArticlesPanelProps = {
+	metadata: EditorMetadata;
+};
+
+export default function ArticlesPanel({ metadata }: ArticlesPanelProps) {
 	const block = useDocument();
+	const articles = metadata.articles;
 
 	const [open, setOpen] = useState(false);
-	const [article, setArticle] = useState<any | null>(null);
+	const [article, setArticle] = useState<EditorArticle | null>(null);
 
-	if (!articles || articles.length === 0) {
-		return <p>No articles found.</p>;
+	if (!articles) {
+		return (
+			<Box
+				sx={{
+					m: 3,
+					p: 1,
+					border: "1px dashed",
+					borderColor: "divider",
+				}}
+			>
+				<Typography color="text.secondary">
+					No articles found.
+				</Typography>
+			</Box>
+		);
 	}
 
 	function addArticle(atBottom: boolean = false) {
@@ -42,7 +61,7 @@ export default function ArticlesPanel({ articles }: { articles?: any[] }) {
 	if (open) {
 		dialog = (
 			<ImportArticleDialog
-				articles={articles}
+				metadata={metadata}
 				onClose={(article?: any) => {
 					setOpen(false);
 					if (article) {
@@ -83,14 +102,21 @@ export default function ArticlesPanel({ articles }: { articles?: any[] }) {
 				<Box>
 					<Card
 						sx={{
-							cursor: "pointer",
-							padding: 1,
-							border: 1,
-							borderColor: "divider",
-							borderRadius: 1,
-							display: "flex",
-							flexDirection: "column",
-							gap: 1,
+							"cursor": "pointer",
+							"padding": 1,
+							"border": 1,
+							"borderColor": "divider",
+							"borderRadius": 1,
+							"display": "flex",
+							"flexDirection": "column",
+							"gap": 1,
+							"transition": "transform 0.2s",
+							"&:hover": {
+								transform: "scale(1.025)",
+							},
+						}}
+						onClick={() => {
+							window.open(article.source_url, "_blank");
 						}}
 					>
 						<CardContent sx={{ p: 0 }}>
@@ -122,6 +148,14 @@ export default function ArticlesPanel({ articles }: { articles?: any[] }) {
 										month: "short",
 										year: "2-digit",
 									})}
+									{", "}
+									{new Date(
+										article.published_at
+									).toLocaleTimeString("en-GB", {
+										hour: "2-digit",
+										minute: "2-digit",
+										hour12: true,
+									})}
 								</Typography>
 							</Box>
 							<Typography variant="h6" fontSize={14} noWrap>
@@ -151,8 +185,7 @@ export default function ArticlesPanel({ articles }: { articles?: any[] }) {
 							alt={article.title}
 						/>
 					</Card>
-					<Divider sx={{ my: 2 }} />
-					<Box my={2}>
+					<Box my={5}>
 						<Typography
 							variant="body2"
 							color="text.secondary"
@@ -179,19 +212,19 @@ export default function ArticlesPanel({ articles }: { articles?: any[] }) {
 							</Button>
 						</Box>
 					</Box>
-					<Divider sx={{ my: 2 }} />
+					<Divider />
 					<Box
 						my={2}
 						display={"flex"}
 						flexDirection={"column"}
 						gap={2}
-						sx={{
-							border: 1,
-							borderColor: "divider",
-							borderRadius: 1,
-							boxShadow: 1,
-							padding: 1,
-						}}
+						// sx={{
+						// 	border: 1,
+						// 	borderColor: "divider",
+						// 	borderRadius: 1,
+						// 	boxShadow: 1,
+						// 	padding: 1,
+						// }}
 					>
 						<Typography
 							variant="body2"
