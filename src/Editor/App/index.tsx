@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
+import { v4 as uuid } from "uuid";
 
-import { Stack, useTheme } from "@mui/material";
+import { Box, Stack, useTheme } from "@mui/material";
 
 import {
 	resetDocument,
@@ -10,8 +11,9 @@ import {
 
 import InspectorDrawer, { INSPECTOR_DRAWER_WIDTH } from "./InspectorDrawer";
 import TemplatePanel from "./TemplatePanel";
-import { renderToStaticMarkup } from "@usewaypoint/email-builder";
+import { Reader, renderToStaticMarkup } from "@usewaypoint/email-builder";
 import { EditorProps } from "../types";
+import html2canvas from "html2canvas";
 
 function useDrawerTransition(
 	cssProperty: "margin-left" | "margin-right",
@@ -27,13 +29,11 @@ function useDrawerTransition(
 }
 
 export default function Editor({
-	articles,
-	categories,
-	onArticleFilter,
-	onArticleMap,
 	template,
 	onChange,
 	onFileUpload,
+	onSnapshot,
+	...metadata
 }: EditorProps) {
 	const inspectorDrawerOpen = useInspectorDrawerOpen();
 	const document = useDocument();
@@ -42,6 +42,42 @@ export default function Editor({
 		"margin-right",
 		inspectorDrawerOpen
 	);
+
+	const [takingSnapshot, setTakingSnapshot] = React.useState(false);
+	const snapshotRef = React.useRef<HTMLDivElement>(null);
+
+	const triggerSnapshot = () => {
+		if (!onSnapshot) return;
+		if (takingSnapshot) return;
+		const snapshotElement = snapshotRef.current;
+		if (!snapshotElement) return;
+
+		setTakingSnapshot(true);
+		html2canvas(snapshotElement, {
+			allowTaint: true,
+			useCORS: true,
+			backgroundColor: "white",
+		})
+			.then((canvas) => {
+				canvas.toBlob((blob) => {
+					if (blob) {
+						const file = new File(
+							[blob],
+							`${Date.now()}-${uuid()}.png`,
+							{ type: "image/png" }
+						);
+
+						onSnapshot?.(file);
+					}
+
+					setTakingSnapshot(false);
+				}, "image/png");
+			})
+			.catch((e) => {
+				console.error("Failed to take snapshot", e);
+				setTakingSnapshot(false);
+			});
+	};
 
 	useEffect(() => {
 		if (template) {
@@ -56,19 +92,24 @@ export default function Editor({
 				design: document,
 			});
 		}
+		triggerSnapshot();
 	}, [document]);
+
+	useEffect(() => {
+		let interval: NodeJS.Timeout = null as any;
+		if (onSnapshot) {
+			interval = setInterval(() => {
+				triggerSnapshot();
+			}, 1000);
+		}
+		return () => {
+			clearInterval(interval);
+		};
+	}, [onSnapshot]);
 
 	return (
 		<>
-			<InspectorDrawer
-				metadata={{
-					articles,
-					categories,
-					onArticleFilter,
-					onArticleMap,
-				}}
-				onFileUpload={onFileUpload}
-			/>
+			<InspectorDrawer metadata={metadata} onFileUpload={onFileUpload} />
 
 			<Stack
 				sx={{
@@ -80,6 +121,19 @@ export default function Editor({
 			>
 				<TemplatePanel />
 			</Stack>
+			<Box
+				sx={{
+					position: "fixed",
+					inset: 0,
+					zIndex: -1,
+					opacity: 0,
+					pointerEvents: "none",
+				}}
+			>
+				<div ref={snapshotRef} style={{ width: "100%", maxWidth: 600 }}>
+					<Reader document={document} rootBlockId="root" />
+				</div>
+			</Box>
 		</>
 	);
 }

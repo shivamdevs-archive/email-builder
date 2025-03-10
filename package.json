@@ -1,6 +1,6 @@
 {
 	"name": "uwp-email-builder",
-	"version": "0.0.6",
+	"version": "0.0.12",
 	"main": "./dist/cjs/index.js",
 	"module": "./dist/esm/index.js",
 	"types": "./dist/esm/index.d.ts",
@@ -28,12 +28,15 @@
 		"@usewaypoint/block-spacer": "^0.0.3",
 		"@usewaypoint/block-text": "^0.0.6",
 		"@usewaypoint/document-core": "^0.0.6",
-		"@usewaypoint/email-builder": "^0.0.8"
+		"@usewaypoint/email-builder": "^0.0.8",
+		"html2canvas": "^1.4.1",
+		"uuid": "^11.0.5"
 	},
 	"devDependencies": {
 		"@types/node": "^22.10.5",
 		"@types/react": "^18.2.55",
 		"@types/react-dom": "^18.2.19",
+		"@types/uuid": "^10.0.0",
 		"@typescript-eslint/eslint-plugin": "^6.21.0",
 		"@typescript-eslint/parser": "^6.21.0",
 		"@vitejs/plugin-react-swc": "^3.5.0",
@@ -45,14 +48,15 @@
 		"vite": "^5.1.0"
 	},
 	"peerDependencies": {
-		"react": ">=18",
-		"react-dom": ">=18",
-		"@mui/material": ">=5",
-		"@mui/icons-material": ">=5",
 		"@emotion/react": ">=11",
 		"@emotion/styled": ">=11",
+		"@mui/icons-material": ">=5",
+		"@mui/material": ">=5",
 		"prettier": ">=2",
+		"react": ">=18",
 		"react-colorful": ">=5",
+		"react-dom": ">=18",
+		"swr": ">=2",
 		"zod": ">=3",
 		"zustand": ">=4"
 	},

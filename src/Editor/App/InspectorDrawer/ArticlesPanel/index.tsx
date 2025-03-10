@@ -25,27 +25,9 @@ export type ArticlesPanelProps = {
 
 export default function ArticlesPanel({ metadata }: ArticlesPanelProps) {
 	const block = useDocument();
-	const articles = metadata.articles;
 
 	const [open, setOpen] = useState(false);
 	const [article, setArticle] = useState<EditorArticle | null>(null);
-
-	if (!articles) {
-		return (
-			<Box
-				sx={{
-					m: 3,
-					p: 1,
-					border: "1px dashed",
-					borderColor: "divider",
-				}}
-			>
-				<Typography color="text.secondary">
-					No articles found.
-				</Typography>
-			</Box>
-		);
-	}
 
 	function addArticle(atBottom: boolean = false) {
 		if (!article) {
@@ -55,23 +37,6 @@ export default function ArticlesPanel({ metadata }: ArticlesPanelProps) {
 		const newTemplate = buildArticleTemplate(block, article, atBottom);
 
 		setDocument(newTemplate);
-	}
-
-	let dialog = null;
-	if (open) {
-		dialog = (
-			<ImportArticleDialog
-				metadata={metadata}
-				onClose={(article?: any) => {
-					setOpen(false);
-					if (article) {
-						setArticle(article);
-					} else {
-						setArticle(null);
-					}
-				}}
-			/>
-		);
 	}
 
 	return (
@@ -273,7 +238,19 @@ export default function ArticlesPanel({ metadata }: ArticlesPanelProps) {
 					</Box>
 				</Box>
 			)}
-			{dialog}
+			<ImportArticleDialog
+				metadata={metadata}
+				open={open}
+				onClose={() => setOpen(false)}
+				onSelect={(article?: any) => {
+					setOpen(false);
+					if (article) {
+						setArticle(article);
+					} else {
+						setArticle(null);
+					}
+				}}
+			/>
 		</Box>
 	);
 }

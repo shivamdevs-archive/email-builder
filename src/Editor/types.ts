@@ -26,13 +26,6 @@ export type EditorCategory = {
 	count: number;
 };
 
-export type EditorArticleFilter = (metadata: {
-	query: string | null;
-	date: string | null;
-	category: string | null;
-	order: "latest" | "oldest";
-}) => void;
-
 export type EditorArticleMap = (article: EditorArticle) => void;
 
 export type EditorFileUploadCallback = (
@@ -48,19 +41,17 @@ export type EditorChangeCallback = ({
 	design: any;
 }) => void;
 
-export type EditorProps = {
-	articles?: any[];
+export type EditorMetadata = {
+	article?: string;
+	articles?: EditorArticle[];
+	category?: string;
 	categories?: EditorCategory[];
-	template?: any;
-	onChange?: EditorChangeCallback;
-	onFileUpload?: EditorFileUploadCallback;
-	onArticleFilter?: EditorArticleFilter;
 	onArticleMap?: EditorArticleMap;
 };
 
-export type EditorMetadata = {
-	articles?: EditorArticle[];
-	categories?: EditorCategory[];
-	onArticleFilter?: EditorArticleFilter;
-	onArticleMap?: EditorArticleMap;
+export type EditorProps = EditorMetadata & {
+	template?: any;
+	onChange?: EditorChangeCallback;
+	onFileUpload?: EditorFileUploadCallback;
+	onSnapshot?: (file: File) => void;
 };

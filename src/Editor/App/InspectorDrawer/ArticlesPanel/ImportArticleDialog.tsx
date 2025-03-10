@@ -6,6 +6,7 @@ import {
 	Card,
 	CardContent,
 	CardMedia,
+	CircularProgress,
 	Dialog,
 	DialogContent,
 	DialogTitle,
@@ -14,32 +15,66 @@ import {
 	Tooltip,
 	Typography,
 } from "@mui/material";
-import { EditorMetadata } from "../../../types";
-import { Close, FilterListOff } from "@mui/icons-material";
+import { EditorArticle, EditorCategory, EditorMetadata } from "../../../types";
+import { Close, FilterListOff, Launch } from "@mui/icons-material";
+import useSWR from "swr";
 
 type ImportArticleDialogProps = {
-	onClose: (article?: any) => void;
+	onSelect: (article?: EditorArticle | null) => void;
+	open: boolean;
+	onClose: () => void;
 	metadata: EditorMetadata;
 };
 export default function ImportArticleDialog({
+	onSelect,
+	open,
 	onClose: onCloseInit,
 	metadata,
 }: ImportArticleDialogProps) {
-	const articles = metadata.articles!;
+	const [filters, setFilters] = React.useState<{
+		query: string | null;
+		date: string | null;
+		category: string | null;
+		order: "latest" | "oldest";
+	}>({
+		query: null,
+		date: null,
+		category: null,
+		order: "latest",
+	});
+
+	const {
+		data: articleData,
+		isLoading: articleLoading,
+		isValidating: articleValidating,
+	} = useSWR<EditorArticle[]>(
+		`${metadata.article}?query=${filters.query ?? ""}&date=${filters.date ?? ""}&category=${filters.category ?? ""}&order=${filters.order}`,
+		{
+			revalidateOnFocus: false,
+			revalidateOnMount: true,
+			revalidateOnReconnect: false,
+		}
+	);
+
+	const { data: categoryData, isLoading: categoryLoading } = useSWR<
+		EditorCategory[]
+	>(metadata.category, {
+		revalidateOnFocus: false,
+		revalidateOnMount: true,
+		revalidateOnReconnect: false,
+	});
 
 	function onClose(article?: any) {
-		onCloseInit(article);
-		metadata.onArticleFilter?.({
-			query: null,
-			date: null,
-			category: null,
-			order: "latest",
-		});
+		onCloseInit();
+		onSelect(article);
 	}
+
+	const articles = articleData ?? metadata.articles ?? [];
+	const categories = categoryData ?? metadata.categories ?? [];
 
 	return (
 		<Dialog
-			open
+			open={open}
 			onClose={() => onClose()}
 			fullWidth
 			maxWidth="xl"
@@ -76,7 +111,8 @@ export default function ImportArticleDialog({
 					const sort = form.elements.namedItem(
 						"sort"
 					) as HTMLSelectElement;
-					metadata.onArticleFilter?.({
+
+					setFilters({
 						query: search.value,
 						date: date.value,
 						category: category.value,
@@ -128,7 +164,7 @@ export default function ImportArticleDialog({
 						}}
 					>
 						<option value="">All Categories</option>
-						{(metadata.categories || []).map((category, index) => (
+						{(categories || []).map((category, index) => (
 							<option key={category.key} value={category.key}>
 								{category.name}
 							</option>
@@ -165,7 +201,7 @@ export default function ImportArticleDialog({
 								borderRadius: 1,
 							}}
 							onClick={() => {
-								metadata.onArticleFilter?.({
+								setFilters({
 									query: null,
 									date: null,
 									category: null,
@@ -179,141 +215,195 @@ export default function ImportArticleDialog({
 				</Box>
 			</form>
 			<DialogContent>
-				{articles.length === 0 && (
-					<Box
-						sx={{
-							m: 3,
-							p: 1,
-							border: "1px dashed",
-							borderColor: "divider",
-						}}
-					>
-						<Typography color="text.secondary" textAlign={"center"}>
-							No article matches the filter.
-						</Typography>
+				{articleLoading || articleValidating || categoryLoading ? (
+					<Box display="flex" justifyContent="center" py={3}>
+						<CircularProgress />
 					</Box>
-				)}
-				<Box
-					display="grid"
-					gap={2}
-					gridTemplateColumns={"repeat(auto-fit, minmax(320px, 1fr))"}
-					py={2}
-				>
-					{articles.map((article, index) => (
-						<Card
-							key={index}
-							onClick={() => {
-								onClose(article);
-								metadata.onArticleMap?.(article);
-							}}
-							sx={{
-								"cursor": "pointer",
-								"padding": 2,
-								"border": 1,
-								"borderColor": "divider",
-								"borderRadius": 3,
-								"display": "flex",
-								"flexDirection": "column",
-								"gap": 2,
-								"transition": "transform 0.2s",
-								"&:hover": {
-									transform: "scale(1.025)",
-								},
-							}}
-						>
-							<CardContent
+				) : (
+					<>
+						{!articles || articles.length === 0 ? (
+							<Box
 								sx={{
-									p: 0,
-									display: "flex",
-									flexDirection: "column",
-									gap: 1,
+									m: 3,
+									p: 1,
+									border: "1px dashed",
+									borderColor: "divider",
 								}}
 							>
-								<Box
-									display="flex"
-									justifyContent="space-between"
-									gap={1}
+								<Typography
+									color="text.secondary"
+									textAlign={"center"}
 								>
-									<Box
-										display="flex"
-										alignItems="center"
-										justifyContent="center"
-										bgcolor="primary.main"
-										color="white"
-										height={40}
+									No article matches the filter.
+								</Typography>
+							</Box>
+						) : (
+							<Box
+								display="grid"
+								gap={2}
+								gridTemplateColumns={
+									"repeat(auto-fit, minmax(320px, 1fr))"
+								}
+								py={2}
+							>
+								{articles.map((article, index) => (
+									<Card
+										key={index}
+										onClick={() => {
+											onClose(article);
+											metadata.onArticleMap?.(article);
+										}}
 										sx={{
-											aspectRatio: "1/1",
-											borderRadius: 1,
+											"position": "relative",
+											"cursor": "pointer",
+											"padding": 2,
+											"border": 1,
+											"borderColor": "divider",
+											"borderRadius": 3,
+											"display": "flex",
+											"flexDirection": "column",
+											"gap": 2,
+											"transition": "transform 0.2s",
+											"&:hover": {
+												transform: "scale(1.025)",
+											},
 										}}
 									>
-										{article.category_tag}
-									</Box>
-									<Box flex={1}>
-										<Typography
-											variant="body2"
-											fontWeight={600}
+										<CardContent
+											sx={{
+												p: 0,
+												display: "flex",
+												flexDirection: "column",
+												gap: 1,
+											}}
 										>
-											{article.author}
-										</Typography>
-										<Typography
-											variant="body2"
-											color="hsla(34, 100%, 50%, 1)"
-											fontWeight={600}
+											<Box
+												display="flex"
+												justifyContent="space-between"
+												gap={1}
+											>
+												<Box
+													display="flex"
+													alignItems="center"
+													justifyContent="center"
+													bgcolor="primary.main"
+													color="white"
+													height={40}
+													sx={{
+														aspectRatio: "1/1",
+														borderRadius: 1,
+													}}
+												>
+													{article.category_tag}
+												</Box>
+												<Box flex={1}>
+													<Typography
+														variant="body2"
+														fontWeight={600}
+													>
+														{article.author}
+													</Typography>
+													<Typography
+														variant="body2"
+														color="hsla(34, 100%, 50%, 1)"
+														fontWeight={600}
+													>
+														{article.category}
+													</Typography>
+												</Box>
+												<Typography
+													variant="caption"
+													color="text.secondary"
+													fontSize={10}
+													pr={3}
+												>
+													{new Date(
+														article.published_at
+													).toLocaleDateString(
+														"en-GB",
+														{
+															day: "2-digit",
+															month: "short",
+															year: "2-digit",
+														}
+													)}
+													,{" "}
+													{new Date(
+														article.published_at
+													).toLocaleTimeString(
+														"en-GB",
+														{
+															hour: "2-digit",
+															minute: "2-digit",
+															hour12: true,
+														}
+													)}
+												</Typography>
+											</Box>
+											<Typography
+												variant="h6"
+												fontSize={14}
+												noWrap
+											>
+												{article.title}
+											</Typography>
+											<Typography
+												variant="body2"
+												color="text.secondary"
+												sx={{
+													display: "-webkit-box",
+													WebkitBoxOrient: "vertical",
+													WebkitLineClamp: 2,
+													overflow: "hidden",
+												}}
+											>
+												{article.content}
+											</Typography>
+										</CardContent>
+										<CardMedia
+											component="img"
+											sx={{
+												width: "100%",
+												aspectRatio: "16/9",
+												borderRadius: 1,
+											}}
+											image={article.poster_url}
+											loading="lazy"
+											alt={article.title}
+										/>
+										<Box
+											position="absolute"
+											top={7}
+											right={2}
 										>
-											{article.category}
-										</Typography>
-									</Box>
-									<Typography
-										variant="caption"
-										color="text.secondary"
-										fontSize={10}
-									>
-										{new Date(
-											article.published_at
-										).toLocaleDateString("en-GB", {
-											day: "2-digit",
-											month: "short",
-											year: "2-digit",
-										})}
-										,{" "}
-										{new Date(
-											article.published_at
-										).toLocaleTimeString("en-GB", {
-											hour: "2-digit",
-											minute: "2-digit",
-											hour12: true,
-										})}
-									</Typography>
-								</Box>
-								<Typography variant="h6" fontSize={14} noWrap>
-									{article.title}
-								</Typography>
-								<Typography
-									variant="body2"
-									color="text.secondary"
-									sx={{
-										display: "-webkit-box",
-										WebkitBoxOrient: "vertical",
-										WebkitLineClamp: 2,
-										overflow: "hidden",
-									}}
-								>
-									{article.content}
-								</Typography>
-							</CardContent>
-							<CardMedia
-								component="img"
-								sx={{
-									width: "100%",
-									aspectRatio: "16/9",
-									borderRadius: 1,
-								}}
-								image={article.poster_url}
-								alt={article.title}
-							/>
-						</Card>
-					))}
-				</Box>
+											<Tooltip title="Read More">
+												<IconButton
+													href={article.source_url}
+													onClick={(e) => {
+														e.stopPropagation();
+													}}
+													target="_blank"
+													rel="noopener noreferrer"
+													size="small"
+													sx={{
+														width: 32,
+														height: 32,
+													}}
+												>
+													<Launch
+														sx={{
+															width: 16,
+														}}
+													/>
+												</IconButton>
+											</Tooltip>
+										</Box>
+									</Card>
+								))}
+							</Box>
+						)}
+					</>
+				)}
 			</DialogContent>
 		</Dialog>
 	);
